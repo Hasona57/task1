@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login and Create Account</title>
+    <link rel="icon" href="images/login.png" type="image/x-icon">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: url('images/background.png') no-repeat center center fixed;
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: background 0.5s ease-in-out;
+        }
+        .container {
+            background: rgba(255, 255, 255, 0.8);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+            width: 400px;
+            max-width: 100%;
+            padding: 30px;
+        }
+        .header {
+            background: #00796b;
+            color: white;
+            text-align: center;
+            padding: 20px;
+            font-size: 1.5em;
+            margin: -30px -30px 20px -30px;
+        }
+        .form-container {
+            padding: 0;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+        input[type="text"], input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 1em;
+        }
+        input[type="text"]:focus, input[type="password"]:focus {
+            border-color: #00796b;
+            outline: none;
+            box-shadow: 0 0 5px #01e3c8;
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            background-color: #00796b;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #005f54;
+        }
+        button:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+        .message {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 1em;
+        }
+        .toggle-link {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #00796b;
+            cursor: pointer;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">User Authentication</div>
+        <div id="login-form" class="form-container">
+            <h3>Login</h3>
+            <div class="form-group">
+                <label for="login-email">Email</label>
+                <input type="text" id="login-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="login-password">Password</label>
+                <input type="password" id="login-password" placeholder="Enter your password">
+            </div>
+            <button id="login-btn">Login</button>
+            <div class="toggle-link" id="to-create-account">Create Account</div>
+        </div>
+        <div id="create-form" class="form-container" style="display: none;">
+            <h3>Create Account</h3>
+            <div class="form-group">
+                <label for="create-email">Email</label>
+                <input type="text" id="create-email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="create-password">Password</label>
+                <input type="password" id="create-password" placeholder="Enter your password">
+            </div>
+            <button id="create-btn">Create Account</button>
+            <div class="toggle-link" id="to-login">Login</div>
+        </div>
+        <div id="message" class="message"></div>
+    </div>
+
+    <script>
+        const getUserDatabase = () => {
+            const users = localStorage.getItem('userDatabase');
+            return users ? JSON.parse(users) : {};
+        };
+
+        const saveUserDatabase = (userDatabase) => {
+            localStorage.setItem('userDatabase', JSON.stringify(userDatabase));
+        };
+
+        document.getElementById('login-btn').addEventListener('click', function() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            const message = document.getElementById('message');
+            const userDatabase = getUserDatabase();
+
+            console.log('Login attempt:', { email, password, userDatabase });
+
+            if (!userDatabase[email]) {
+                message.textContent = 'This email is not registered.';
+                message.style.color = '#dc3545';
+            } else if (userDatabase[email] !== password) {
+                message.textContent = 'Incorrect password.';
+                message.style.color = '#dc3545';
+            } else {
+                message.textContent = 'Login successful!';
+                message.style.color = '#28a745';
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 1000);
+            }
+        });
+
+        document.getElementById('create-btn').addEventListener('click', function() {
+            const email = document.getElementById('create-email').value;
+            const password = document.getElementById('create-password').value;
+            const message = document.getElementById('message');
+            const userDatabase = getUserDatabase();
+
+            console.log('Create account attempt:', { email, password, userDatabase });
+
+            if (userDatabase[email]) {
+                message.textContent = 'This email is already registered.';
+                message.style.color = '#dc3545';
+            } else {
+                userDatabase[email] = password;
+                saveUserDatabase(userDatabase);
+                message.textContent = 'Account created successfully!';
+                message.style.color = '#28a745';
+                setTimeout(() => {
+                    document.getElementById('create-form').style.display = 'none';
+                    document.getElementById('login-form').style.display = 'block';
+                }, 1000);
+            }
+        });
+
+        // Toggle between login and create account forms
+        document.getElementById('to-create-account').addEventListener('click', function() {
+            document.getElementById('login-form').style.display = 'none';
+            document.getElementById('create-form').style.display = 'block';
+        });
+
+        document.getElementById('to-login').addEventListener('click', function() {
+            document.getElementById('create-form').style.display = 'none';
+            document.getElementById('login-form').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
